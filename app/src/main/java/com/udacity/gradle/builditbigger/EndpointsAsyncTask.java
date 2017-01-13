@@ -1,8 +1,6 @@
 package com.udacity.gradle.builditbigger;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.util.Pair;
 import android.util.Log;
@@ -16,29 +14,25 @@ import com.google.api.client.googleapis.services.GoogleClientRequestInitializer;
 
 import java.io.IOException;
 
-import gradle.udacity.com.jokedisplay.JokeActivity;
-
-import static gradle.udacity.com.jokedisplay.JokeActivity.ARG_JOKE;
-
 public class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, String> {
+    //    private ProgressDialog progressDialog;
+    public AsyncCompletedListener asyncCompletedListener;
     private MyApi myApiService = null;
     private Context context;
-    private ProgressDialog progressDialog;
-    public AsyncCompletedListener asyncCompletedListener;
 
-    public EndpointsAsyncTask(Context context){
-        this.context = context;
-}
+    public EndpointsAsyncTask(AsyncCompletedListener listener) {
+        asyncCompletedListener = listener;
+    }
 
 
 
-    @Override
+    /*@Override
     protected void onPreExecute() {
         progressDialog = new ProgressDialog(context);
         progressDialog.setTitle("Joke is generating...");
         progressDialog.setMessage("Joke Joke");
         progressDialog.show();
-    }
+    }*/
 
     @Override
     protected String doInBackground(Pair<Context, String>... params) {
@@ -66,30 +60,24 @@ public class EndpointsAsyncTask extends AsyncTask<Pair<Context, String>, Void, S
         try {
             return myApiService.sayJoke().execute().getData();
         } catch (IOException e) {
-            Log.d("Async",e.getMessage());
+            Log.d("Async", e.getMessage());
             return null;
         }
     }
 
     @Override
     protected void onPostExecute(String result) {
-        if(result!=null){
+        if (result != null) {
 
             Log.d("Main", result);
-            progressDialog.hide();
             super.onPostExecute(result);
-            Intent intent = new Intent(context, JokeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra(ARG_JOKE, result);
-            context.startActivity(intent);
-        }else {
-            progressDialog.hide();
-            Toast.makeText(context,"No internet",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, "No internet", Toast.LENGTH_SHORT).show();
         }
-
+        asyncCompletedListener.onComplete(result);
     }
 
-    interface AsyncCompletedListener {
+    public interface AsyncCompletedListener {
         void onComplete(String result);
     }
 }

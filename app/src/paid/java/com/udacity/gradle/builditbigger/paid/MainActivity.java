@@ -1,6 +1,8 @@
 package com.udacity.gradle.builditbigger.paid;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
 import android.support.v7.app.AppCompatActivity;
@@ -11,9 +13,13 @@ import android.view.View;
 import com.udacity.gradle.builditbigger.EndpointsAsyncTask;
 import com.udacity.gradle.builditbigger.R;
 
-public class MainActivity extends AppCompatActivity {
+import gradle.udacity.com.jokedisplay.JokeActivity;
 
-    public static String mResult;
+import static gradle.udacity.com.jokedisplay.JokeActivity.ARG_JOKE;
+
+public class MainActivity extends AppCompatActivity implements EndpointsAsyncTask.AsyncCompletedListener {
+
+    public ProgressDialog progressDialog;
     public Context mContext;
 
     @Override
@@ -32,12 +38,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -46,20 +48,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view) {
-//        Toast.makeText(this, JokeLibrary.getJoke(), Toast.LENGTH_SHORT).show();
-//        Intent intent = new Intent(MainActivity.this, JokeActivity.class);
-//        JokeLibrary joke = new JokeLibrary();
-//        joke.setJoke("Hi");
-//        intent.putExtra(ARG_JOKE,joke.getJoke());
-//        startActivity(intent);
         mContext = MainActivity.this;
-        new EndpointsAsyncTask(mContext).execute(new Pair<Context, String>(mContext, "Manfred"));
-//        if (mLaunch ==0){
-//
-//            getSupportLoaderManager().initLoader(2,null,this);
-//        }else {
-//            getSupportLoaderManager().restartLoader(2,null,this);
-//        }
+        progressDialog = new ProgressDialog(mContext);
+        progressDialog.setTitle("Joke is generating...");
+        progressDialog.setMessage("Joke Joke");
+        progressDialog.show();
+        new EndpointsAsyncTask(this).execute(new Pair<Context, String>(mContext, "Manfred"));
     }
 
+    private void startJokeActivity(String joke){
+        Intent intent = new Intent(this, JokeActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.putExtra(ARG_JOKE, joke);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onComplete(String result) {
+        progressDialog.hide();
+        startJokeActivity(result);
+    }
 }

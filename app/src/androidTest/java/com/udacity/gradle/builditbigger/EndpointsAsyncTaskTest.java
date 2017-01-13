@@ -6,8 +6,6 @@ import android.support.test.rule.ActivityTestRule;
 import android.support.v4.util.Pair;
 import android.util.Log;
 
-import com.udacity.gradle.builditbigger.free.MainActivity;
-
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -19,7 +17,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by Jay on 1/12/2017.
  */
-public class EndpointsAsyncTaskTest {
+public class EndpointsAsyncTaskTest implements EndpointsAsyncTask.AsyncCompletedListener {
 
     /*@Before
     public void setPd(){
@@ -35,7 +33,7 @@ public class EndpointsAsyncTaskTest {
 
         Context context = mActivityRule.getActivity().getBaseContext();
         AsyncTask<Pair<Context, String>, Void, String> endpointsAsyncTask =
-                new EndpointsAsyncTask(context).
+                new EndpointsAsyncTask(this).
                         execute(new Pair<Context, String>(context, "Manfred"));
         String joke = endpointsAsyncTask.get(30,TimeUnit.SECONDS);
 
@@ -45,4 +43,8 @@ public class EndpointsAsyncTaskTest {
         }
     }
 
+    @Override
+    public void onComplete(String result) {
+
+    }
 }
